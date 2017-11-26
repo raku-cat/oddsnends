@@ -14,25 +14,24 @@ import com.github.javiersantos.piracychecker.enums.InstallerID
 import com.github.javiersantos.piracychecker.enums.PiracyCheckerCallback
 import com.github.javiersantos.piracychecker.enums.PiracyCheckerError
 import com.github.javiersantos.piracychecker.enums.PirateApp
-import com.raku.oddsnends.Constants.ENABLE_KNOWN_THIRD_PARTY_THEME_MANAGERS
-import com.raku.oddsnends.Constants.ENFORCE_MINIMUM_SUBSTRATUM_VERSION
-import com.raku.oddsnends.Constants.MINIMUM_SUBSTRATUM_VERSION
-import com.raku.oddsnends.Constants.OTHER_THEME_SYSTEMS
-import com.raku.oddsnends.Constants.SUBSTRATUM_FILTER_CHECK
-import com.raku.oddsnends.Constants.THEME_READY_GOOGLE_APPS
-import com.raku.oddsnends.Constants.THEME_READY_PACKAGES
-import com.raku.oddsnends.ThemeFunctions.SUBSTRATUM_PACKAGE_NAME
-import com.raku.oddsnends.ThemeFunctions.checkNetworkConnection
-import com.raku.oddsnends.ThemeFunctions.checkSubstratumIntegrity
-import com.raku.oddsnends.ThemeFunctions.getSelfSignature
-import com.raku.oddsnends.ThemeFunctions.getSelfVerifiedIntentResponse
-import com.raku.oddsnends.ThemeFunctions.getSelfVerifiedPirateTools
-import com.raku.oddsnends.ThemeFunctions.getSelfVerifiedThemeEngines
-import com.raku.oddsnends.ThemeFunctions.getSubstratumFromPlayStore
-import com.raku.oddsnends.ThemeFunctions.getSubstratumUpdatedResponse
-import com.raku.oddsnends.ThemeFunctions.hasOtherThemeSystem
-import com.raku.oddsnends.ThemeFunctions.isCallingPackageAllowed
-import com.raku.oddsnends.ThemeFunctions.isPackageInstalled
+import substratum.theme.template.Constants.ENABLE_KNOWN_THIRD_PARTY_THEME_MANAGERS
+import substratum.theme.template.Constants.ENFORCE_MINIMUM_SUBSTRATUM_VERSION
+import substratum.theme.template.Constants.MINIMUM_SUBSTRATUM_VERSION
+import substratum.theme.template.Constants.OTHER_THEME_SYSTEMS
+import substratum.theme.template.Constants.SUBSTRATUM_FILTER_CHECK
+import substratum.theme.template.Constants.THEME_READY_GOOGLE_APPS
+import substratum.theme.template.Constants.THEME_READY_PACKAGES
+import substratum.theme.template.ThemeFunctions.SUBSTRATUM_PACKAGE_NAME
+import substratum.theme.template.ThemeFunctions.checkSubstratumIntegrity
+import substratum.theme.template.ThemeFunctions.getSelfSignature
+import substratum.theme.template.ThemeFunctions.getSelfVerifiedIntentResponse
+import substratum.theme.template.ThemeFunctions.getSelfVerifiedPirateTools
+import substratum.theme.template.ThemeFunctions.getSelfVerifiedThemeEngines
+import substratum.theme.template.ThemeFunctions.getSubstratumFromPlayStore
+import substratum.theme.template.ThemeFunctions.getSubstratumUpdatedResponse
+import substratum.theme.template.ThemeFunctions.hasOtherThemeSystem
+import substratum.theme.template.ThemeFunctions.isCallingPackageAllowed
+import substratum.theme.template.ThemeFunctions.isPackageInstalled
 import java.io.File
 import java.util.*
 
@@ -206,20 +205,13 @@ class SubstratumLauncher : Activity() {
         }
     }
 
-    private fun checkConnection(certified: Boolean, modeLaunch: String?): Boolean {
-        val isConnected = checkNetworkConnection()
-        return if (!isConnected!!) {
-            Toast.makeText(this, R.string.toast_internet, Toast.LENGTH_LONG).show()
-            false
+    private fun checkConnection(certified: Boolean, modeLaunch: String?) {
+        val editor = getPreferences(Context.MODE_PRIVATE).edit()
+        editor.putInt("last_version", BuildConfig.VERSION_CODE).apply()
+        if (THEME_READY_GOOGLE_APPS) {
+            detectThemeReady(certified, modeLaunch)
         } else {
-            val editor = getPreferences(Context.MODE_PRIVATE).edit()
-            editor.putInt("last_version", BuildConfig.VERSION_CODE).apply()
-            if (THEME_READY_GOOGLE_APPS) {
-                detectThemeReady(certified, modeLaunch)
-            } else {
-                calibrateSystem(certified, modeLaunch)
-            }
-            true
+            calibrateSystem(certified, modeLaunch)
         }
     }
 
